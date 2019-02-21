@@ -1,0 +1,88 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>CSV MERGER</title>
+</head>
+
+<body>
+    <form>
+        <div>
+            <p>Csv Dosyalarını Seçiniz</p>
+            <input id="inputs" type="file" multiple>
+        </div>
+        <div>
+            <p>Çıktı Klasörünü Seçiniz</p>
+            <input type="file" onchange="selectFolder(event);" webkitdirectory mozdirectory msdirectory odirectory
+                directory multiple="multiple" />
+        </div>
+        <br>
+        <button type="submit">Birleştir</button>
+    </form>
+</body>
+
+<script>
+    const fs = require('fs')
+    let outputFolderPath
+
+    function selectFolder(e) {
+        outputFolderPath = e.target.files[0].path
+    }
+    document.querySelector('form').addEventListener('submit', (event) => {
+        if (document.querySelector('input').files.length > 0) {
+            if (outputFolderPath != undefined) {
+                event.preventDefault()
+                const files = document.querySelector('input').files
+                const lineEnd = "\r\n"
+                var finalData = ""
+                for (let i = 0; i < files.length; i++) {
+                    var readingFile = fs.readFileSync(files[i].path)
+                    var utf8Data = readingFile.toString("utf8")
+                    
+                    var dataArray = utf8Data.split(lineEnd)
+                    var removedRows = dataArray.splice(0, 3);
+                    var firstLine = removedRows[0];
+                    if (i === 0) {
+                        var header = ["coordx","coordy","modified","projeadi","dirname","filename","mindistnce",
+                        "heading","imgname","frame","imgtotal","cat1code","cat2code","cat3code","cat4code","idcode",
+                        "altitude","hgtofgeoid","gga_hdop","gpsqlty","nsstsinuse","fixmode","grndspeed","rmc_tarih",
+                        "gga_zaman","camserial","gpsmodel","label","durum","pitch","roll","timestamp"]
+                        finalData += header.join(';')
+                    }
+                    var parsedPath = firstLine.split("\\")
+                    var fileName = parsedPath[parsedPath.length - 1].split(" - ")[0]
+                    var newArrayData = []
+                    for (let index = 0; index < dataArray.length; index++) {
+                        let newLine = new Array(32).fill(null)
+                        let line = dataArray[index];
+                        if(line !== null && line !== undefined && line.length){
+                            let lineArray = line.split(";")
+                            newLine[0] = lineArray[5];
+                            newLine[1] = lineArray[4];
+                            newLine[5] = fileName;
+                            newLine[7] = lineArray[3];
+                            newLine[8] = lineArray[0] + ".jpeg";
+                            newLine[16] = lineArray[1];
+                            newLine[19] = lineArray[8];
+                            newLine[29] = lineArray[9];
+                            newLine[30] = lineArray[10];
+                            newLine[31] = lineArray[11];
+                            newArrayData.push(newLine.join(";"));
+                        }
+                    }
+                    finalData += "\n"
+                    finalData += newArrayData.join(lineEnd)
+                }
+                fs.writeFileSync(outputFolderPath + "/yeni.csv", finalData)
+                document.querySelector('input').value = ""
+                alert("İşlem Başarılı")
+            } else {
+                alert("Lütfen Çıktı Klasör Seçiniz")
+            }
+        } else {
+            alert("Lütfen En Az Bir Dosya Seçiniz!!!")
+        }
+    })
+</script>
+
+</html>
