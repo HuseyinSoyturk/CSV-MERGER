@@ -38,24 +38,24 @@
                 for (let i = 0; i < files.length; i++) {
                     var readingFile = fs.readFileSync(files[i].path)
                     var utf8Data = readingFile.toString("utf8")
-                    
+
                     var dataArray = utf8Data.split(lineEnd)
                     var removedRows = dataArray.splice(0, 3);
                     var firstLine = removedRows[0];
                     if (i === 0) {
-                        var header = ["coordx","coordy","modified","projeadi","dirname","filename","mindistnce",
-                        "heading","imgname","frame","imgtotal","cat1code","cat2code","cat3code","cat4code","idcode",
-                        "altitude","hgtofgeoid","gga_hdop","gpsqlty","nsstsinuse","fixmode","grndspeed","rmc_tarih",
-                        "gga_zaman","camserial","gpsmodel","label","durum","pitch","roll","timestamp"]
+                        var header = ["coordx", "coordy", "modified", "projeadi", "dirname", "filename", "mindistnce",
+                            "heading", "imgname", "frame", "imgtotal", "cat1code", "cat2code", "cat3code", "cat4code", "idcode",
+                            "altitude", "hgtofgeoid", "gga_hdop", "gpsqlty", "nsstsinuse", "fixmode", "grndspeed", "rmc_tarih",
+                            "gga_zaman", "camserial", "gpsmodel", "label", "durum", "pitch", "roll", "stamp", "sokak", "kkn", "yon"]
                         finalData += header.join(';')
                     }
                     var parsedPath = firstLine.split("\\")
                     var fileName = parsedPath[parsedPath.length - 1].split(" - ")[0]
                     var newArrayData = []
                     for (let index = 0; index < dataArray.length; index++) {
-                        let newLine = new Array(32).fill(null)
+                        let newLine = new Array(header.length).fill(null)
                         let line = dataArray[index];
-                        if(line !== null && line !== undefined && line.length){
+                        if (line !== null && line !== undefined && line.length) {
                             let lineArray = line.split(";")
                             newLine[0] = lineArray[5];
                             newLine[1] = lineArray[4];
