@@ -16,6 +16,20 @@
             <input type="file" onchange="selectFolder(event);" webkitdirectory mozdirectory msdirectory odirectory
                 directory multiple="multiple" />
         </div>
+        <div>
+            <p>Sınırlayıcı Seçiniz</p>
+            <select onchange="onChangeDelimiter(this.value)" style="font-size:14px;font-weight:bolder" id="delimiter">
+                <option style="font-size:14px;font-weight:bolder" selected value=";">;</option>
+                <option style="font-size:14px;font-weight:bolder" value=",">,</option>
+                <option style="font-size:14px;font-weight:bolder" value="|">|</option>
+                <option style="font-size:14px;font-weight:bolder" value=":">:</option>
+                <option style="font-size:14px;font-weight:bolder" value=" ">Boşluk</option>
+            </select>
+        </div>
+        <div>
+            <p>Eski Sistem Mi ?</p>
+            <input id="oldSystem" type="checkbox"/>
+        </div>
         <br>
         <button type="submit">Birleştir</button>
     </form>
@@ -24,15 +38,19 @@
 <script>
     const fs = require('fs')
     let outputFolderPath
-
+    let delimiter = document.getElementById('delimiter').value;
     function selectFolder(e) {
         outputFolderPath = e.target.files[0].path
+    }
+    function onChangeDelimiter(value) {
+        delimiter = value;
     }
     document.querySelector('form').addEventListener('submit', (event) => {
         if (document.querySelector('input').files.length > 0) {
             if (outputFolderPath != undefined) {
                 event.preventDefault()
-                const files = document.querySelector('input').files
+                const files = document.querySelector('input').files;
+                const oldSystem = document.getElementById('oldSystem').checked;
                 const lineEnd = "\r\n"
                 var finalData = ""
                 for (let i = 0; i < files.length; i++) {
@@ -47,7 +65,7 @@
                             "heading", "imgname", "frame", "imgtotal", "cat1code", "cat2code", "cat3code", "cat4code", "idcode",
                             "altitude", "hgtofgeoid", "gga_hdop", "gpsqlty", "nsstsinuse", "fixmode", "grndspeed", "rmc_tarih",
                             "gga_zaman", "camserial", "gpsmodel", "label", "durum", "pitch", "roll", "stamp", "sokak", "kkn", "yon"]
-                        finalData += header.join(';')
+                        finalData += header.join(delimiter);
                     }
                     var parsedPath = firstLine.split("\\")
                     var fileName = parsedPath[parsedPath.length - 1].split(" - ")[0]
@@ -55,19 +73,31 @@
                     for (let index = 0; index < dataArray.length; index++) {
                         let newLine = new Array(header.length).fill(null)
                         let line = dataArray[index];
+                        if (delimiter === ',') {
+                            let splittedLine = line.split('"');
+                            if (splittedLine[1]) {
+                                splittedLine[1] = splittedLine[1].replace(/,/g, '_');
+                                line = splittedLine.join('"');
+                            }
+                        }
                         if (line !== null && line !== undefined && line.length) {
-                            let lineArray = line.split(";")
+                            let lineArray = line.split(delimiter)
                             newLine[0] = lineArray[5];
                             newLine[1] = lineArray[4];
                             newLine[5] = fileName;
                             newLine[7] = lineArray[3];
                             newLine[8] = lineArray[0] + ".jpeg";
                             newLine[16] = lineArray[1];
-                            newLine[19] = lineArray[8];
-                            newLine[29] = lineArray[9];
+                            if(oldSystem){
+                                newLine[19] = lineArray[8];
+                                newLine[29] = lineArray[9];
+                            }else{
+                                newLine[19] = lineArray[9];
+                                newLine[29] = lineArray[8];
+                            }
                             newLine[30] = lineArray[10];
                             newLine[31] = lineArray[11];
-                            newArrayData.push(newLine.join(";"));
+                            newArrayData.push(newLine.join(delimiter));
                         }
                     }
                     finalData += "\n"

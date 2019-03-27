@@ -4,7 +4,9 @@
   "description": "For Merge Csv",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package-win": "electron-packager . CSVMERGER --overwrite --platform=win32 --arch=ia32",
+    "package-linux": "electron-packager . CSVMERGER --overwrite --platform=linux --arch=ia32"
   },
   "author": "Hüseyin Soytürk",
   "license": "ISC",
